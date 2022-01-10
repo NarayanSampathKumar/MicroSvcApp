@@ -22,6 +22,16 @@
 <b><u>Step 3 :</u></b> To build the application 
 <pre><code>mvn clean package
 </code></pre>
+<h2> Note</h2>
+To Run the application in docker-compose
+
+Edit MicroSvcApp/Modules/webstore/src/main/resources/config.properties
+core_domain=webstore:80    ------->core_domain=webstore:8080<br>
+product_domain=product:80  ------->product_domain=product:8080<br>
+cart_domain=quote:80       ------->cart_domain=quote:8080<br>
+order_domain=order:80      ------->order_domain=order:8080<br>
+customer_domain=customer:80------->customer_domain=customer:8080<br>
+payment_domain=payment:80  ------->payment_domain=payment:8080<br>
 
 <h2>Run the application without APM Agent </h2>
 
