@@ -2,238 +2,243 @@
 apiVersion: apps/v1 
 kind: Deployment
 metadata:
-   name: mysql
+	name: mysql
+	labels:
+		name: mysql
 spec:
-   replicas: 1
-   selector:
-      matchLabels:
-         app: mysql
-   strategy:
-      type: Recreate
-   template:
-      metadata:
-         labels:
-            app: mysql
-      spec:
-         containers:
-         - image: egapm/new-webstore:mysql
-           name: webstore-mysql 
-           env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: root
-           ports:
-            - containerPort: 3306
-              name: mysql
-         imagePullSecrets:
-         - name: apmcred
+	replicas: 1
+	selector:
+		matchLabels:
+			app: mysql
+	strategy:
+		type: Recreate
+	template:
+		metadata:
+			labels:
+				app: mysql
+		spec:
+			containers:
+			- image: egapm/new-webstore:mysql
+			  name: webstore-mysql 
+			  env:
+			- name: MYSQL_ROOT_PASSWORD
+			  value: root
+			  ports:
+			  - containerPort: 3306
+				name: mysql
+			imagePullSecrets:
+			- name: apmcred
 ---
 apiVersion: v1
 kind: Service
 metadata:
-   name: webstoredb 
+	name: webstoredb 
 spec:
-   ports:
-   - port: 3306 
-     targetPort: 3306
-   selector:
-      app: mysql
-
+	ports:
+	- port: 3306 
+	  targetPort: 3306
+	selector:
+		app: mysql
 # Deployments of all Microservices
 # 1. webstore
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webstore
+	name: webstore
+	labels:
+		name: webstore
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: webstore
-  template:
-    metadata:
-      labels:
-        name: webstore
-    spec:
-      containers:
-      - name: webstore
-        image: egapm/docker-compose-kubernetes:webstore
-        ports:
-         - containerPort: 8080
-        env:
-         - name: JAVA_OPTS 
-           value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Webstore"
-         - name: webstore_domain
-           value: "webstore"
-         - name: product_domain
-           value: "product"
-         - name: cart_domain
-           value: "quote"
-         - name: order_domain
-           value: "order"
-         - name: customer_domain
-           value: "customer"
-         - name: payment_domain
-           value: "payment"
-         - name: activemq_domain
-           value: "messagequeue:61616"
-         - name: jms_queue
-           value: "shipping-queue"
+	replicas: 1
+	selector:
+		matchLabels:
+			name: webstore
+	template:
+		metadata:
+			labels:
+				name: webstore
+		spec:
+			containers:
+			- name: webstore
+			  image: egapm/docker-compose-kubernetes:webstore
+			  ports:
+			  - containerPort: 8080
+			  env:	
+			  - name: JAVA_OPTS 
+				value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Webstore"
+			  - name: webstore_domain
+				value: "webstore"
+			  - name: product_domain
+				value: "product"
+			  - name: cart_domain
+				value: "quote"
+			  - name: order_domain
+				value: "order"
+			  - name: customer_domain
+				value: "customer"
+			  - name: payment_domain
+				value: "payment"
+			  - name: activemq_domain
+				value: "messagequeue:61616"
+			  - name: jms_queue
+				value: "shipping-queue"
 ---
 # 2. quote
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: quote
+	name: quote
+	labels:
+		name: quote
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: quote
-  template:
-    metadata:
-      labels:
-        name: quote
-    spec:
-      containers:
-      - name: quote
-        image: egapm/docker-compose-kubernetes:quote
-        ports:
-        - containerPort: 8080
-        env:
-         - name: JAVA_OPTS 
-           value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Quote"
-         - name: product_domain
-           value: "product"
+	replicas: 1
+	selector:
+	matchLabels:
+		name: quote
+	template:
+		metadata:
+			labels:
+				name: quote
+		spec:
+			containers:
+			- name: quote
+			image: egapm/docker-compose-kubernetes:quote
+			ports:
+			- containerPort: 8080
+			env:
+			- name: JAVA_OPTS 
+			  value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Quote"
+			- name: product_domain
+			  value: "product"
 ---
 # 3. Product
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: product
-  labels:
-    name: product
+	name: product
+	labels:
+		name: product
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: product
-  template:
-    metadata:
-      labels:
-        name: product
-    spec:
-      containers:
-      - name: product
-        image: egapm/docker-compose-kubernetes:product
-        ports:
-         - containerPort: 8080
-        env:
-         - name: JAVA_OPTS 
-           value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Product"
+	replicas: 1
+	selector:
+		matchLabels:
+			name: product
+	template:
+		metadata:
+			labels:
+				name: product
+		spec:
+			containers:
+			- name: product
+			  image: egapm/docker-compose-kubernetes:product
+			  ports:
+			  - containerPort: 8080
+			  env:
+			  - name: JAVA_OPTS 
+				value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Product"
 ---
 # 4. Payment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment
-  labels:
-    name: payment
+	name: payment
+	labels:
+		name: payment
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: payment
-  template:
-    metadata:
-      labels:
-        name: payment
-    spec:
-      containers:
-      - name: payment
-        image: egapm/docker-compose-kubernetes:payment
-        ports:
-         - containerPort: 8080
-        env:
-         - name: JAVA_OPTS
-           value: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Payment"
-         - name: gateway_domain
-           value: "gateway"
+	replicas: 1
+	selector:
+		matchLabels:
+			name: payment
+	template:
+		metadata:
+			labels:
+				name: payment
+		spec:
+			containers:
+			- name: payment
+			  image: egapm/docker-compose-kubernetes:payment
+			  ports:
+			  - containerPort: 8080
+			  env:
+			  - name: JAVA_OPTS
+				value: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Payment"
+			  - name: gateway_domain
+				value: "gateway"
 ---
 # 5. order
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order
-  labels:
-    name: order
+	name: order
+	labels:
+	name: order
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: order 
-  template:
-    metadata:
-      labels:
-        name: order
-    spec:
-      containers:
-      - name: order
-        image: egapm/docker-compose-kubernetes:order
-        ports:
-        - containerPort: 8080
-        env:
-         - name: JAVA_OPTS
-           value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Order"
+	replicas: 1
+	selector:
+		matchLabels:
+			name: order 
+	template:
+		metadata:
+			labels:
+				name: order
+		spec:
+			containers:
+			- name: order
+			  image: egapm/docker-compose-kubernetes:order
+			  ports:
+			- containerPort: 8080
+			  env:
+			  - name: JAVA_OPTS
+				value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Order"
 ---
 # 6. Gateway
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gateway
+	name: gateway
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: gateway
-  template:
-    metadata:
-      labels:
-        name: gateway
-    spec:
-      containers:
-      - name: gateway
-        image: egapm/docker-compose-kubernetes:gateway
-        ports:
-        - containerPort: 8080
-        resources:
-          limits:
-             cpu: 500m
-          requests:
-             cpu: 200m
+	replicas: 1
+	selector:
+		matchLabels:
+			name: gateway
+	template:
+		metadata:
+			labels:
+				name: gateway
+		spec:
+			containers:
+			- name: gateway
+			  image: egapm/docker-compose-kubernetes:gateway
+			  ports:
+			- containerPort: 8080
+			  resources:
+				limits:
+					cpu: 500m
+				requests:
+					cpu: 200m
 ---
 # 7. Customer
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: customer
+	name: customer
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: customer
-  template:
-    metadata:
-      labels:
-        name: customer
-    spec:
-      containers:
-      - name: customer
-        image: egapm/docker-compose-kubernetes:customer
-        ports:
-        - containerPort: 8080
-        env:
-         - name: JAVA_OPTS
-           value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Customer"
+	replicas: 1
+	selector:
+		matchLabels:
+			name: customer
+	template:
+		metadata:
+			labels:
+				name: customer
+		spec:
+			containers:
+			- name: customer
+			  image: egapm/docker-compose-kubernetes:customer
+			  ports:
+			- containerPort: 8080
+			  env:
+			  - name: JAVA_OPTS
+				value: "-Duser.timezone=Asia/Singapore -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=3333 -Dcom.sun.management.jmxremote.rmi.port=3333 -DeG_Service_Name=Webstore-microsvc -DeG_Group_Name=Customer"
 ---
 
 # Services for all micro-services
@@ -241,88 +246,88 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: webstore
-  labels:
-    name: webstore
+	name: webstore
+	labels:
+		name: webstore
 spec:
-  ports:    
-  - port: 8610
-    nodePort: 31313
-    targetPort: 8080
-  selector:
-    name: webstore
-  type: NodePort
+	ports:    
+	- port: 8610
+	  nodePort: 31313
+	  targetPort: 8080
+	selector:
+	name: webstore
+	type: NodePort
 ---
 #2. quote
 apiVersion: v1
 kind: Service
 metadata:
-  name: quote
+	name: quote
 spec:
-  selector:
-    name: quote 
-  ports:
-  - port: 80
-    targetPort: 8080
+	selector:
+	name: quote 
+	ports:
+	- port: 80
+	  targetPort: 8080
  ---
  #3. product
  apiVersion: v1
 kind: Service
 metadata:
-  name: product
+	name: product
 spec:
-  selector:
-    name: product
-  ports:
-  - port: 80
-    targetPort: 8080
+	selector:
+		name: product
+	ports:
+	- port: 80
+	  targetPort: 8080
 ---
 #4. payment
 apiVersion: v1
 kind: Service
 metadata:
-  name: payment
-  labels:
-    name: payment
+	name: payment
+labels:
+	name: payment
 spec:
-  ports:    
-  - port: 80
-    targetPort: 8080
-  selector:
-    name: payment
+	ports:    
+	- port: 80
+	  targetPort: 8080
+	selector:
+		name: payment
 ---
 #5. order
 apiVersion: v1
 kind: Service
 metadata:
-  name: order 
+	name: order 
 spec:
-  selector:
-    name: order 
-  ports:
-  - port: 80
-    targetPort: 8080
+	selector:
+		name: order 
+	ports:
+	- port: 80
+	  targetPort: 8080
 ---
 #6. gateway
 apiVersion: v1
 kind: Service
 metadata:
-  name: gateway 
+	name: gateway 
 spec:
-  selector:
-    name: gateway 
-  ports:
-  - port: 80
-    targetPort: 80
+	selector:
+		name: gateway 
+	ports:
+	- port: 80
+	  targetPort: 80
 ---
 #7. customer
 apiVersion: v1
 kind: Service
 metadata:
-  name: customer
+	name: customer
 spec:
-  selector:
-    name: customer 
-  ports:
-  - port: 80
-    targetPort: 8080
+	selector:
+		name: customer 
+	ports:
+	- port: 80
+	targetPort: 8080
